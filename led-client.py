@@ -2,7 +2,7 @@ import requests
 import time
 import json
 import gpiozero
-from rpi_ws281x import PixelStrip, Color
+import rpi_ws281x
 
 # Configuration
 API_URL = "https://beiersdorfraspi-eeefbrfsf2cadcb9.westeurope-01.azurewebsites.net/api/leds"
@@ -28,7 +28,7 @@ LED_CHANNEL = 0      # set to '1' for GPIOs 13, 19, 41, 45 or 53
 gpio_leds = {led_id: gpiozero.LED(pin) for led_id, pin in LED_PINS.items()}
 
 # Initialize addressable LEDs
-strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
+strip = rpi_ws281x.PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
 strip.begin()
 
 def hex_to_rgb(hex_color):
