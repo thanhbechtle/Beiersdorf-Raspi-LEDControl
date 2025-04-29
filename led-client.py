@@ -46,7 +46,12 @@ def update_leds():
         for led_id, state in led_states.items():
             if led_id in gpio_leds:
                 # Standard GPIO control
-                gpio_leds[led_id].on() if state["on"] else gpio_leds[led_id].off()
+                if state["on"]:
+                    gpio_leds[led_id].on()
+                    print(f"GPIO LED {led_id} turned ON")
+                else:
+                    gpio_leds[led_id].off()
+                    print(f"GPIO LED {led_id} turned OFF")
             
             # Addressable LED control (WS2812B)
             if led_id.isdigit() and int(led_id) <= LED_COUNT:
@@ -54,8 +59,10 @@ def update_leds():
                 if state["on"]:
                     r, g, b = hex_to_rgb(state["color"])
                     strip.setPixelColor(led_index, Color(r, g, b))
+                    print(f"Addressable LED {led_id} set to color ({r}, {g}, {b})")
                 else:
                     strip.setPixelColor(led_index, Color(0, 0, 0))
+                    print(f"Addressable LED {led_id} turned OFF")
         
         strip.show()
         
