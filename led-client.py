@@ -36,7 +36,11 @@ def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip('#')
     return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
+# Track previous LED states
+previous_led_states = {}
+
 def update_leds():
+    global previous_led_states
     try:
         headers = {"api-key": API_KEY}
         response = requests.get(f"{API_URL}", headers=headers)
@@ -44,25 +48,32 @@ def update_leds():
         led_states = response.json()
         
         for led_id, state in led_states.items():
+            # Check if the state has changed for GPIO LEDs
             if led_id in gpio_leds:
-                # Standard GPIO control
-                if state["on"]:
-                    gpio_leds[led_id].on()
-                    print(f"GPIO LED {led_id} turned ON")
-                else:
-                    gpio_leds[led_id].off()
-                    print(f"GPIO LED {led_id} turned OFF")
+                previous_state = previous_led_states.get(led_id, {"on": None})
+                if state["on"] != previous_state["on"]:
+                    if state["on"]:
+                        gpio_leds[led_id].on()
+                        print(f"GPIO LED {led_id} turned ON")
+                    else:
+                        gpio_leds[led_id].off()
+                        print(f"GPIO LED {led_id} turned OFF")
             
-            # Addressable LED control (WS2812B)
+            # Check if the state or color has changed for addressable LEDs
             if led_id.isdigit() and int(led_id) <= LED_COUNT:
                 led_index = int(led_id) - 1
-                if state["on"]:
-                    r, g, b = hex_to_rgb(state["color"])
-                    strip.setPixelColor(led_index, Color(r, g, b))
-                    print(f"Addressable LED {led_id} set to color ({r}, {g}, {b})")
-                else:
-                    strip.setPixelColor(led_index, Color(0, 0, 0))
-                    print(f"Addressable LED {led_id} turned OFF")
+                previous_state = previous_led_states.get(led_id, {"on": None, "color": None})
+                if state["on"] != previous_state["on"] or state.get("color") != previous_state.get("color"):
+                    if state["on"]:
+                        r, g, b = hex_to_rgb(state["color"])
+                        strip.setPixelColor(led_index, Color(r, g, b))
+                        print(f"Addressable LED {led_id} set to color ({r}, {g}, {b})")
+                    else:
+                        strip.setPixelColor(led_index, Color(0, 0, 0))
+                        print(f"Addressable LED {led_id} turned OFF")
+            
+            # Update the previous state
+            previous_led_states[led_id] = state
         
         strip.show()
         
