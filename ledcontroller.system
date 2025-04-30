@@ -1,0 +1,12 @@
+[Unit]
+Description=LED Controller
+After=network.target
+
+[Service]
+Type=idle
+Restart=on-failure
+User=root
+ExecStart=/bin/bash -c 'source home/raspi/ledcontrol-env/bin/activate && sudo python home/raspi/Beiersdorf-raspi-ledcontrol/led-client.py'
+
+[Install]
+WantedBy=multi-user.target
