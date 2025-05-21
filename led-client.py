@@ -27,7 +27,14 @@ LED_INVERT = False   # True to invert the signal
 LED_CHANNEL = 0      # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
 # Initialize GPIO
-gpio_leds = {led_id: gpiozero.LED(pin) for led_id, pin in LED_PINS.items()}
+gpio_leds = {led_id: gpiozero.LED(pin) for led_id, pin in LED_PINS.items() if led_id not in ["1", "2"]}
+
+# Permanently turn on LED 1 and 2
+led1 = gpiozero.LED(17)
+led2 = gpiozero.LED(18)
+led1.on()
+led2.on()
+print("LED 1 and LED 2 permanently ON")
 
 # Initialize addressable LEDs
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
@@ -57,17 +64,17 @@ def update_leds():
 
         for led_id, state in led_states.items():
             # --- Handle GPIO LEDs (e.g., keys like "1", "2", ...)
-            if led_id in gpio_leds:
-                previous_state = previous_led_states.get(led_id, {"on": None})
-                if state["on"] != previous_state["on"]:
-                    if state["on"]:
-                        gpio_leds[led_id].on()
-                        print(f"GPIO LED {led_id} turned ON")
-                    else:
-                        gpio_leds[led_id].off()
-                        print(f"GPIO LED {led_id} turned OFF")
-                previous_led_states[led_id] = state
-                continue  # skip to next LED
+            # if led_id in gpio_leds:
+            #     previous_state = previous_led_states.get(led_id, {"on": None})
+            #     if state["on"] != previous_state["on"]:
+            #         if state["on"]:
+            #             gpio_leds[led_id].on()
+            #             print(f"GPIO LED {led_id} turned ON")
+            #         else:
+            #             gpio_leds[led_id].off()
+            #             print(f"GPIO LED {led_id} turned OFF")
+            #     previous_led_states[led_id] = state
+            #     continue  # skip to next LED
 
             # --- Handle matrix LEDs using "x,y" notation
             if ',' in led_id:
